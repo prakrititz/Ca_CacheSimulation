@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 from tqdm import tqdm 
 
+class CacheLine:
+    def __init__(self, tag):
+        self.tag = tag
+        self.valid = False
+
 class Cache:
     def __init__(self, cache_size_kb, block_size_bytes, associativity):
         """
@@ -50,12 +55,15 @@ class Cache:
         cache_set = self.cache[index]
         if tag in cache_set:
             self.hits += 1
-            cache_set.move_to_end(tag)
+            cache_set.move_to_end(tag, last = False)
         else:
             self.misses += 1
             if len(cache_set) >= self.associativity:
                 cache_set.popitem(last=True)
+            new_line = CacheLine(tag)
+            new_line.valid = True
             cache_set[tag] = True
+            cache_set.move_to_end(tag, last=False)
 
 
 def read_file(filename):
